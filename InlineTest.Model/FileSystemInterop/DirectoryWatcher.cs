@@ -24,7 +24,7 @@ namespace InlineTest.Model.FileSystemInterop
         private bool _disposed;
         private readonly Dictionary<FileDescriptor, FileData> _currentData = new Dictionary<FileDescriptor, FileData>();
         private readonly Dictionary<string, FileDescriptor> _pathToDescriptor = new Dictionary<string, FileDescriptor>(); // Т.к. в решении не используется БД, приходится делать индексы вручную.
-        private readonly object _syncRoot = new object();
+        private volatile object _syncRoot = new object();
         private readonly Statistics<char> _globalStatistics = new Statistics<char>(); 
         private readonly ManualResetEventSlim _initialProcessGate = new ManualResetEventSlim();
         private bool _initialFolderProceeded;
@@ -34,7 +34,7 @@ namespace InlineTest.Model.FileSystemInterop
         {
             Path = path;
             Filter = filter;
-            _topN = new LimitedSizeSortedList<KeyValuePair<char, int>>(FrequencyComparer.Instance, FrequencyComparer.Instance, topCount);
+            _topN = new LimitedSizeSortedList<KeyValuePair<char, int>>(FrequencyComparer.Instance, topCount);
 
             _watcher = new FileSystemWatcher
             {
@@ -130,7 +130,6 @@ namespace InlineTest.Model.FileSystemInterop
                     var deletedStatistics = _currentData[descriptor];
                     _currentData.Remove(descriptor);
                     _globalStatistics.Remove(deletedStatistics.Statistics);
-                    _topN.Clear(); //Обновляем статистику полностью если файл удален
                     OnUpdate();
                 }
 
@@ -141,19 +140,11 @@ namespace InlineTest.Model.FileSystemInterop
         {
             lock (_syncRoot)
             {
-                UpdateTop();
+                _topN.Update(_globalStatistics);
                 Update(this, EventArgs.Empty);
             }
         }
-
-        private void UpdateTop()
-        {
-            foreach (var item in _globalStatistics)
-            {
-                _topN.Add(item);
-            }
-        }
-
+        
         public void Dispose()
         {
             DisposeInternal();

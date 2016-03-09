@@ -9,7 +9,7 @@ namespace InlineTest.Model.Collections
         [Pure]
         public static LimitedSizeSortedList<T> FromComparable<T>(int size) where T : IComparable<T>
         {
-            return new LimitedSizeSortedList<T>(Comparer<T>.Default, EqualityComparer<T>.Default, size);
+            return new LimitedSizeSortedList<T>(Comparer<T>.Default, size);
         } 
     }
 }

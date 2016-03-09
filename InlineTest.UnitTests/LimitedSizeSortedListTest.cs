@@ -62,7 +62,7 @@ namespace InlineTest.UnitTests
                 new KeyValuePair<char, int>('G', 616626)
             };
 
-            var result = new LimitedSizeSortedList<KeyValuePair<char, int>>(FrequencyComparer.Instance, FrequencyComparer.Instance, 5);
+            var result = new LimitedSizeSortedList<KeyValuePair<char, int>>(FrequencyComparer.Instance, 5);
             foreach (var pair in items)
             {
                 result.Add(pair);
