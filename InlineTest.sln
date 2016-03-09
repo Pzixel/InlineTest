@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InlineTest.ConsoleAp", "Inl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InlineTest.Model", "InlineTest.Model\InlineTest.Model.csproj", "{6E9F32A0-0238-4586-B7A6-0A47760989D7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InlineTest.DataGenerator", "InlineTest.DataGenerator\InlineTest.DataGenerator.csproj", "{BA8326B6-0101-4021-93E5-14719A821047}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{6E9F32A0-0238-4586-B7A6-0A47760989D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6E9F32A0-0238-4586-B7A6-0A47760989D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6E9F32A0-0238-4586-B7A6-0A47760989D7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BA8326B6-0101-4021-93E5-14719A821047}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BA8326B6-0101-4021-93E5-14719A821047}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BA8326B6-0101-4021-93E5-14719A821047}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BA8326B6-0101-4021-93E5-14719A821047}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,16 +1,20 @@
 ﻿using System;
+using System.Diagnostics;
 using InlineTest.Model;
 
 namespace InlineTest.ConsoleAp
 {
     class Program
     {
+        const string GeneratorName = "InlineTest.DataGenerator.exe";
+
         static void Main(string[] args)
         {
             using (var watcher = new DirectoryWatcher("Test", "*.txt"))
             {
                 watcher.Update += OnUpdate;
                 watcher.Start();
+                Process.Start(GeneratorName, "Test");
                 Console.ReadKey();
             }
         }
