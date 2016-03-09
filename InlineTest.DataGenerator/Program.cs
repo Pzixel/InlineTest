@@ -42,9 +42,9 @@ namespace InlineTest.DataGenerator
                 string content = new string(toGenerate, count); // Генерируем специально в памяти для скорости, для больших строк лучше сразу писать в файл.
                 File.WriteAllText(Path.Combine(unboxedPath, fileName), content);
 
-                int toSleep = r.Next(500, 1000);
+                int toSleep = r.Next(50, 1000);
                 Console.WriteLine("Сплю {0} миллисекунд", toSleep);
-             //   Thread.Sleep(toSleep);
+                Thread.Sleep(toSleep);
             }
         }
 
