@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using InlineTest.Model.Collections;
 using InlineTest.Model.Domain;
 using InlineTest.Model.Extensions;
 
@@ -14,7 +15,8 @@ namespace InlineTest.Model.FileSystemInterop
     {
         public string Path { get; }
         public string Filter { get; }
-        public ReadOnlyDictionary<char, int> Statistics => new ReadOnlyDictionary<char, int>(_globalStatistics);
+        public ReadOnlyDictionary<char, int> Total => new ReadOnlyDictionary<char, int>(_globalStatistics);
+        public IReadOnlyCollection<KeyValuePair<char, int>> TopN => _topN.ToList().AsReadOnly();
 
         public event EventHandler Update = delegate { };
 
@@ -26,11 +28,13 @@ namespace InlineTest.Model.FileSystemInterop
         private readonly Statistics<char> _globalStatistics = new Statistics<char>(); 
         private readonly ManualResetEventSlim _initialProcessGate = new ManualResetEventSlim();
         private bool _initialFolderProceeded;
+        private LimitedSizeSortedList<KeyValuePair<char, int>> _topN;
 
-        public DirectoryWatcher(string path, string filter)
+        public DirectoryWatcher(string path, string filter, int topCount)
         {
             Path = path;
             Filter = filter;
+            _topN = new LimitedSizeSortedList<KeyValuePair<char, int>>(FrequencyComparer.Instance, FrequencyComparer.Instance, topCount);
 
             _watcher = new FileSystemWatcher
             {
@@ -126,6 +130,7 @@ namespace InlineTest.Model.FileSystemInterop
                     var deletedStatistics = _currentData[descriptor];
                     _currentData.Remove(descriptor);
                     _globalStatistics.Remove(deletedStatistics.Statistics);
+                    _topN.Clear(); //Обновляем статистику полностью если файл удален
                     OnUpdate();
                 }
 
@@ -134,7 +139,19 @@ namespace InlineTest.Model.FileSystemInterop
         }
         private void OnUpdate()
         {
-            Update(this, EventArgs.Empty);
+            lock (_syncRoot)
+            {
+                UpdateTop();
+                Update(this, EventArgs.Empty);
+            }
+        }
+
+        private void UpdateTop()
+        {
+            foreach (var item in _globalStatistics)
+            {
+                _topN.Add(item);
+            }
         }
 
         public void Dispose()

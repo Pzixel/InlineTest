@@ -35,12 +35,16 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Collections\ReadOnlyCustomCollection.cs" />
+    <Compile Include="Collections\XLimitedSizeSortedList.cs" />
+    <Compile Include="Collections\XReadOnlyCustomCollection.cs" />
     <Compile Include="FileSystemInterop\DirectoryWatcher.cs" />
     <Compile Include="Extensions\XFile.cs" />
     <Compile Include="FileSystemInterop\FileData.cs" />
     <Compile Include="FileSystemInterop\FileDescriptor.cs" />
     <Compile Include="Domain\Statistics.cs" />
-    <Compile Include="LimitedSizeSortedList.cs" />
+    <Compile Include="Collections\LimitedSizeSortedList.cs" />
+    <Compile Include="Collections\FrequencyComparer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
