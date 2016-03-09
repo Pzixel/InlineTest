@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using InlineTest.Model;
+using InlineTest.Model.FileSystemInterop;
 
 namespace InlineTest.ConsoleAp
 {

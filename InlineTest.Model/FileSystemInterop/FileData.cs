@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
+using InlineTest.Model.Domain;
 
-namespace InlineTest.Model
+namespace InlineTest.Model.FileSystemInterop
 {
     internal class FileData
     {

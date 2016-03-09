@@ -1,15 +1,15 @@
 ﻿using System.Collections.Generic;
 
-namespace InlineTest.Model
+namespace InlineTest.Model.Domain
 {
-    public class Statistics<T> : Dictionary<T, int>
+    internal class Statistics<T> : Dictionary<T, int>
     {
-        internal Statistics()
+        public Statistics()
         {
             
         }
 
-        internal Statistics(IEnumerable<T> source)
+        public Statistics(IEnumerable<T> source)
         {
             foreach (T value in source)
             {
@@ -20,7 +20,7 @@ namespace InlineTest.Model
             }
         }
 
-        internal void Add(Statistics<T> statistics)
+        public void Add(Statistics<T> statistics)
         {
             foreach (var pair in statistics)
             {
@@ -31,7 +31,7 @@ namespace InlineTest.Model
             }
         }
 
-        internal void Remove(Statistics<T> statistics)
+        public void Remove(Statistics<T> statistics)
         {
             foreach (var pair in statistics)
             {

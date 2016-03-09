@@ -5,9 +5,10 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using InlineTest.Model.Domain;
 using InlineTest.Model.Extensions;
 
-namespace InlineTest.Model
+namespace InlineTest.Model.FileSystemInterop
 {
     public class DirectoryWatcher : IDisposable
     {
@@ -20,7 +21,6 @@ namespace InlineTest.Model
         private readonly FileSystemWatcher _watcher;
         private bool _disposed;
         private readonly Dictionary<FileDescriptor, FileData> _currentData = new Dictionary<FileDescriptor, FileData>();
-    //    private readonly Dictionary<FileDescriptor, List<string>> _descriptorToPaths = new Dictionary<FileDescriptor, List<string>>(); //Нужен для того, чтобы быстро искать дескриптор по пути. Аналогичен индексу в БД
         private readonly Dictionary<string, FileDescriptor> _pathToDescriptor = new Dictionary<string, FileDescriptor>(); // Т.к. в решении не используется БД, приходится делать индексы вручную.
         private readonly object _syncRoot = new object();
         private readonly Statistics<char> _globalStatistics = new Statistics<char>(); 
@@ -88,7 +88,7 @@ namespace InlineTest.Model
                 {
                     _currentData[descriptor] = new FileData(statistics, path);
                     _globalStatistics.Add(statistics);
-                    Update(this, EventArgs.Empty);
+                    OnUpdate();
                 }
                 else
                     existingFile.Paths.Add(path);
@@ -126,13 +126,16 @@ namespace InlineTest.Model
                     var deletedStatistics = _currentData[descriptor];
                     _currentData.Remove(descriptor);
                     _globalStatistics.Remove(deletedStatistics.Statistics);
-                    Update(this, EventArgs.Empty);
+                    OnUpdate();
                 }
 
                 _pathToDescriptor.Remove(path);
             }
         }
-
+        private void OnUpdate()
+        {
+            Update(this, EventArgs.Empty);
+        }
 
         public void Dispose()
         {

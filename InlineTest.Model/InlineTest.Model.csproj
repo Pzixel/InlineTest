@@ -33,19 +33,14 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DirectoryWatcher.cs" />
+    <Compile Include="FileSystemInterop\DirectoryWatcher.cs" />
     <Compile Include="Extensions\XFile.cs" />
-    <Compile Include="FileData.cs" />
-    <Compile Include="FileDescriptor.cs" />
-    <Compile Include="Statistics.cs" />
+    <Compile Include="FileSystemInterop\FileData.cs" />
+    <Compile Include="FileSystemInterop\FileDescriptor.cs" />
+    <Compile Include="Domain\Statistics.cs" />
+    <Compile Include="LimitedSizeSortedList.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

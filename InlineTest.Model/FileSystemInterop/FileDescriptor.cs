@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 
-namespace InlineTest.Model
+namespace InlineTest.Model.FileSystemInterop
 {
     [DebuggerDisplay("HashCode = {_hashCode}")]
     internal class FileDescriptor
