@@ -1,13 +1,12 @@
 ﻿using System;
 using System.IO;
-using System.Text;
 using System.Threading;
 
 namespace InlineTest.DataGenerator
 {
-    class Program
+    public static class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             if (args.Length < 1)
             {

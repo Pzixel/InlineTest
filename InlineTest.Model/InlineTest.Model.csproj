@@ -35,9 +35,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Collections\ReadOnlyCustomCollection.cs" />
     <Compile Include="Collections\XLimitedSizeSortedList.cs" />
-    <Compile Include="Collections\XReadOnlyCustomCollection.cs" />
     <Compile Include="FileSystemInterop\DirectoryWatcher.cs" />
     <Compile Include="Extensions\XFile.cs" />
     <Compile Include="FileSystemInterop\FileData.cs" />

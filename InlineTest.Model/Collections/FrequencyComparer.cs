@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 
 namespace InlineTest.Model.Collections
@@ -19,6 +18,7 @@ namespace InlineTest.Model.Collections
         {
             return obj.Key.GetHashCode();
         }
+
         public static FrequencyComparer Instance { get; } = new FrequencyComparer();
     }
 }

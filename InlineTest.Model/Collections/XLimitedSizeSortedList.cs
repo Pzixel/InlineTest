@@ -4,7 +4,7 @@ using System.Diagnostics.Contracts;
 
 namespace InlineTest.Model.Collections
 {
-    public class XLimitedSizeSortedList
+    public static class XLimitedSizeSortedList
     {
         [Pure]
         public static LimitedSizeSortedList<T> FromComparable<T>(int size) where T : IComparable<T>

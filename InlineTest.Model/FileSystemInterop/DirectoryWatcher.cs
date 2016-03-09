@@ -11,25 +11,50 @@ using InlineTest.Model.Extensions;
 
 namespace InlineTest.Model.FileSystemInterop
 {
+    /// <summary>
+    /// Класс мониторинга изменений файлов в папке
+    /// </summary>
     public class DirectoryWatcher : IDisposable
     {
         public string Path { get; }
         public string Filter { get; }
-        public ReadOnlyDictionary<char, int> Total => new ReadOnlyDictionary<char, int>(_globalStatistics);
+        public ReadOnlyDictionary<char, int> Total
+        {
+            get
+            {
+                lock (_syncRoot) //делаем снапшот
+                {
+                    return new ReadOnlyDictionary<char, int>(_globalStatistics);
+                }
+            }
+        }
+
         public IReadOnlyCollection<KeyValuePair<char, int>> TopN => _topN.ToList().AsReadOnly();
 
+        /// <summary>
+        /// Событие, вызываемое при изменении, добавлении или удалении файлов из папки
+        /// </summary>
         public event EventHandler Update = delegate { };
 
+        #region private fields
+        private volatile object _syncRoot = new object();
         private readonly FileSystemWatcher _watcher;
-        private bool _disposed;
         private readonly Dictionary<FileDescriptor, FileData> _currentData = new Dictionary<FileDescriptor, FileData>();
         private readonly Dictionary<string, FileDescriptor> _pathToDescriptor = new Dictionary<string, FileDescriptor>(); // Т.к. в решении не используется БД, приходится делать индексы вручную.
-        private volatile object _syncRoot = new object();
-        private readonly Statistics<char> _globalStatistics = new Statistics<char>(); 
+        private readonly Statistics<char> _globalStatistics = new Statistics<char>();
+        private readonly LimitedSizeSortedList<KeyValuePair<char, int>> _topN;
         private readonly ManualResetEventSlim _initialProcessGate = new ManualResetEventSlim();
         private bool _initialFolderProceeded;
-        private LimitedSizeSortedList<KeyValuePair<char, int>> _topN;
+        private bool _disposed;
+        #endregion
 
+        /// <summary>
+        /// Создает объект, наблюдающий за папкой по пути {path}, используя фильтр {filter}, и сортирующий топ N значений.
+        /// Для запуска необходимо вызвать метод Start
+        /// </summary>
+        /// <param name="path">Путь к папке с файлами</param>
+        /// <param name="filter">Фильтр желаемых файлов</param>
+        /// <param name="topCount">Количество позиций для сортировки</param>
         public DirectoryWatcher(string path, string filter, int topCount)
         {
             Path = path;
@@ -40,7 +65,7 @@ namespace InlineTest.Model.FileSystemInterop
             {
                 Path = path,
                 Filter = filter,
-                NotifyFilter = NotifyFilters.LastWrite 
+                NotifyFilter = NotifyFilters.LastWrite
             };
 
             _watcher.Changed += (sender, args) => OnChanged(args.FullPath);
@@ -74,32 +99,6 @@ namespace InlineTest.Model.FileSystemInterop
             _watcher.EnableRaisingEvents = false;
         }
 
-        private void OnNewFile(string path)
-        {
-            _initialProcessGate.Wait(); // Если мы еще не закончили обрабатывать файлы, которые были в папке, а в ней уже что-то меняют, сначала досчитываем, а потом смотрим, что произошло
-            var file = XFile.ReadText(path).Select(char.ToUpper);
-            var statistics = new Statistics<char>(file); // Если коллизий мало, то выгоднее сразу посчитать значение, потому что иначе это нужно делать под lock'ом и мы теряем всю многопоточность
-            UpdateStatistics(path, statistics);
-        }
-
-        private void UpdateStatistics(string path, Statistics<char> statistics)
-        {
-            var descriptor = new FileDescriptor(path);
-            lock (_syncRoot) // лочим всегда, т.к. статистику и хэш файла мы уже посчитали, поэтому осталось только обновить пару служебных таблиц, это можно сделать быстро, таким образом лок не должен сильно влиять на производительность
-            {
-                FileData existingFile;
-                if (!_currentData.TryGetValue(descriptor, out existingFile))
-                {
-                    _currentData[descriptor] = new FileData(statistics, path);
-                    _globalStatistics.Add(statistics);
-                    OnUpdate();
-                }
-                else
-                    existingFile.Paths.Add(path);
-                _pathToDescriptor[path] = descriptor;
-            }
-        }
-
         private void OnChanged(string path)
         {
             FileDescriptor descriptor;
@@ -108,7 +107,7 @@ namespace InlineTest.Model.FileSystemInterop
                 OnNewFile(path);
                 return;
             }
-            if (File.GetLastWriteTime(path) <= descriptor.LastRead) // Если документ не изменялся, то это известный баг вотчера: http://stackoverflow.com/questions/1764809/filesystemwatcher-changed-event-is-raised-twice
+            if (File.GetLastWriteTime(path) <= descriptor.LastWrite) // Если документ не изменялся, то это известный баг вотчера: http://stackoverflow.com/questions/1764809/filesystemwatcher-changed-event-is-raised-twice
                 return;
             OnDeleted(path);
             OnNewFile(path);
@@ -136,6 +135,33 @@ namespace InlineTest.Model.FileSystemInterop
                 _pathToDescriptor.Remove(path);
             }
         }
+
+        private void OnNewFile(string path)
+        {
+            _initialProcessGate.Wait(); // Если мы еще не закончили обрабатывать файлы, которые были в папке, а в ней уже что-то меняют, сначала досчитываем, а потом смотрим, что произошло
+            var file = XFile.ReadText(path).Select(char.ToUpper);
+            var statistics = new Statistics<char>(file); // Если коллизий мало, то выгоднее сразу посчитать значение, потому что иначе это нужно делать под lock'ом и мы теряем всю многопоточность
+            UpdateStatistics(path, statistics);
+        }
+
+        private void UpdateStatistics(string path, Statistics<char> statistics)
+        {
+            var descriptor = new FileDescriptor(path);
+            lock (_syncRoot) // лочим всегда, т.к. статистику и хэш файла мы уже посчитали, поэтому осталось только обновить пару служебных таблиц, это можно сделать быстро, таким образом лок не должен сильно влиять на производительность
+            {
+                FileData existingFile;
+                if (!_currentData.TryGetValue(descriptor, out existingFile))
+                {
+                    _currentData[descriptor] = new FileData(statistics, path);
+                    _globalStatistics.Add(statistics);
+                    OnUpdate();
+                }
+                else
+                    existingFile.Paths.Add(path);
+                _pathToDescriptor[path] = descriptor;
+            }
+        }
+        
         private void OnUpdate()
         {
             lock (_syncRoot)
@@ -144,11 +170,16 @@ namespace InlineTest.Model.FileSystemInterop
                 Update(this, EventArgs.Empty);
             }
         }
-        
+
         public void Dispose()
         {
-            DisposeInternal();
-            GC.SuppressFinalize(this);
+            if (!_disposed)
+                lock (_syncRoot)
+                    if (!_disposed)
+                    {
+                        DisposeInternal();
+                        GC.SuppressFinalize(this);
+                    }
         }
 
         protected virtual void DisposeInternal()

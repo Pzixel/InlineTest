@@ -1,23 +1,24 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Linq;
-using InlineTest.Model;
+using System.IO;
 using InlineTest.Model.FileSystemInterop;
 
 namespace InlineTest.ConsoleAp
 {
-    class Program
+    public static class Program
     {
-        const string GeneratorName = "InlineTest.DataGenerator.exe";
+        private const int TopCount = 5;
+        private const string GeneratorName = "InlineTest.DataGenerator.exe";
+        private const string DefaultFolderName = "Test";
 
-        static void Main(string[] args)
+        public static void Main()
         {
-            const int max = 5;
-            using (var watcher = new DirectoryWatcher("Test", "*.txt", max))
+            Directory.CreateDirectory(DefaultFolderName); // Создаем папку если её не существует
+            using (var watcher = new DirectoryWatcher(DefaultFolderName, "*.txt", TopCount))
             {
                 watcher.Update += OnUpdate;
                 watcher.Start();
-                Process.Start(GeneratorName, "Test");
+                Process.Start(GeneratorName, DefaultFolderName);
                 Console.ReadKey();
             }
         }
@@ -27,15 +28,14 @@ namespace InlineTest.ConsoleAp
             var watcher = (DirectoryWatcher) sender;
             Console.Clear();
             Console.SetCursorPosition(0, 0);
+            Console.WriteLine("Топ {0} самых популярных символов в папке '{1}'", TopCount, Path.Combine(Environment.CurrentDirectory, DefaultFolderName));
+            Console.WriteLine();
+            int i = 0;
             foreach (var pair in watcher.TopN)
             {
-                Console.WriteLine("{0}\t{1}", pair.Key, pair.Value);
+                Console.WriteLine("{0}: {1} (код {2}) \t{3} шт", ++i, pair.Key, (int) pair.Key, pair.Value);
             }
-            Console.WriteLine("Сбор статистики начат. Для остановки нажмите любую клавишу . . .");
-            foreach (var pair in watcher.Total.OrderByDescending(x=>x.Value).Take(5))
-            {
-                Console.WriteLine("{0}\t{1}", pair.Key, pair.Value);
-            }
+            Console.WriteLine("Производится подсчет статистики в реальном времени. Для остановки нажмите любую клавишу . . .");
         }
     }
 }

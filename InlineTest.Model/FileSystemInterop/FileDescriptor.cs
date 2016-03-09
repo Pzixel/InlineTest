@@ -6,19 +6,23 @@ using System.Security.Cryptography;
 
 namespace InlineTest.Model.FileSystemInterop
 {
+    /// <summary>
+    /// Дескриптор файла, основанный на хэшировании SHA256. Так как вероятность коллизии для миллиарда файлов 4.3*10^-60 такая же, 
+    /// как вероятность коллизии такого-же количества гуидов (что есть невозможное событие), считаем, что хэш уникально идентифицирует файл по содержимому.
+    /// </summary>
     [DebuggerDisplay("HashCode = {_hashCode}")]
     internal class FileDescriptor
     {
         private static readonly SHA256Managed Crypt = new SHA256Managed();
         private readonly int _hashCode;
         private readonly byte[] _sha256Bytes;
-        public DateTime LastRead { get; }
+        public DateTime LastWrite { get; }
 
         public FileDescriptor(string path)
         {
-            LastRead = File.GetLastWriteTime(path);
+            LastWrite = File.GetLastWriteTime(path);
             _sha256Bytes = GetHash(path);
-            _hashCode = _sha256Bytes.Aggregate(0, (acc, b) => acc * 397 + b); // Можно было бы использовать отложенное вычисление, но т.к. словарь все равно будет считать, то лучше уж сразу 1 раз посчитать
+            _hashCode = _sha256Bytes.Aggregate(0, (acc, b) => acc * 397 + b); // Можно было бы использовать отложенное вычисление, но т.к. словарь все равно будет считать, то лучше уж сразу сохранить предподсчитанное значение
         }
 
         protected bool Equals(FileDescriptor other)
