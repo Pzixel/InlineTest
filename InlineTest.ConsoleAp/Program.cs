@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using System.Text;
 using InlineTest.Model.FileSystemInterop;
 
 namespace InlineTest.ConsoleAp
@@ -14,7 +13,6 @@ namespace InlineTest.ConsoleAp
 
         public static void Main()
         {
-            Console.OutputEncoding = Encoding.UTF8;
             Directory.CreateDirectory(DefaultFolderName); // Создаем папку если её не существует
             using (var watcher = new DirectoryWatcher(DefaultFolderName, "*.txt", TopCount))
             {
