@@ -65,11 +65,19 @@ namespace InlineTest.Model.FileSystemInterop
             {
                 Path = path,
                 Filter = filter,
-                NotifyFilter = NotifyFilters.LastWrite
+                NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.LastAccess | NotifyFilters.FileName
             };
 
             _watcher.Changed += (sender, args) => OnChanged(args.FullPath);
             _watcher.Deleted += (sender, args) => OnDeleted(args.FullPath);
+            _watcher.Renamed += (sender, args) => OnRenamed(args);
+        }
+
+        private void OnRenamed(RenamedEventArgs args)
+        {
+            var descriptor = _pathToDescriptor[args.OldFullPath];
+            _pathToDescriptor.Remove(args.OldFullPath);
+            _pathToDescriptor[args.FullPath] = descriptor;
         }
 
         public void Start()
