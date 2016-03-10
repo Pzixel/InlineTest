@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 using InlineTest.Model.FileSystemInterop;
 
 namespace InlineTest.ConsoleAp
@@ -13,6 +14,7 @@ namespace InlineTest.ConsoleAp
 
         public static void Main()
         {
+            Console.OutputEncoding = Encoding.UTF8;
             Directory.CreateDirectory(DefaultFolderName); // Создаем папку если её не существует
             using (var watcher = new DirectoryWatcher(DefaultFolderName, "*.txt", TopCount))
             {
@@ -33,7 +35,7 @@ namespace InlineTest.ConsoleAp
             int i = 0;
             foreach (var pair in watcher.TopN)
             {
-                Console.WriteLine("{0}: {1} (код {2}) \t{3} шт", ++i, pair.Key, (int) pair.Key, pair.Value);
+                Console.WriteLine("{0}: {1} (код {2,5}){3,10} шт", ++i, pair.Key, (int) pair.Key, pair.Value);
             }
             Console.WriteLine("Производится подсчет статистики в реальном времени. Для остановки нажмите любую клавишу . . .");
         }
