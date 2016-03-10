@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InlineTest.ConsoleAp", "InlineTest.ConsoleAp\InlineTest.ConsoleAp.csproj", "{F2A8250F-2BAB-43FE-B0AB-D83E74730580}"
+	ProjectSection(ProjectDependencies) = postProject
+		{BA8326B6-0101-4021-93E5-14719A821047} = {BA8326B6-0101-4021-93E5-14719A821047}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InlineTest.Model", "InlineTest.Model\InlineTest.Model.csproj", "{6E9F32A0-0238-4586-B7A6-0A47760989D7}"
 EndProject
